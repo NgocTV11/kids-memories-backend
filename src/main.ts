@@ -9,7 +9,7 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   // Global prefix
-  app.setGlobalPrefix('api/v1');
+  app.setGlobalPrefix('api');
 
   // Static files for uploaded photos with caching
   app.useStaticAssets(join(__dirname, '..', 'uploads'), {
@@ -42,10 +42,10 @@ async function bootstrap() {
   );
 
   const port = process.env.PORT || 3001;
-  await app.listen(port);
+  await app.listen(port, '0.0.0.0');
 
-  console.log(`🚀 Backend running on http://localhost:${port}`);
-  console.log(`📚 API Docs: http://localhost:${port}/api/v1`);
-  console.log(`📁 Uploads: http://localhost:${port}/uploads/`);
+  console.log(`🚀 Backend running on: http://0.0.0.0:${port}`);
+  console.log(`📚 API Docs: http://0.0.0.0:${port}/api`);
+  console.log(`📁 Uploads: http://0.0.0.0:${port}/uploads/`);
 }
 bootstrap();
