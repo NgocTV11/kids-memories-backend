@@ -155,43 +155,7 @@ export class AuthService {
     return user;
   }
 
-  async googleLogin(googleUser: any) {
-    const { email, firstName, lastName, picture } = googleUser;
 
-    // Find or create user
-    let user = await this.prisma.users.findUnique({
-      where: { email },
-    });
-
-    if (!user) {
-      // Create new user from Google profile
-      user = await this.prisma.users.create({
-        data: {
-          email,
-          display_name: `${firstName} ${lastName}`,
-          avatar_url: picture,
-          role: 'family_member',
-          language: 'vi',
-          // No password_hash for OAuth users
-        },
-      });
-    }
-
-    // Generate tokens
-    const tokens = await this.generateTokens(user.id, user.email, user.role);
-
-    return {
-      accessToken: tokens.access_token,
-      refreshToken: tokens.refresh_token,
-      user: {
-        id: user.id,
-        email: user.email,
-        display_name: user.display_name,
-        avatar_url: user.avatar_url,
-        role: user.role,
-      },
-    };
-  }
 
   private async generateTokens(
     userId: string,

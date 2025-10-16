@@ -5,13 +5,11 @@ import { ConfigService } from '@nestjs/config';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
-import { GoogleStrategy } from './strategies/google.strategy';
 import { PrismaService } from '../prisma/prisma.service';
-import { SessionSerializer } from './session.serializer';
 
 @Module({
   imports: [
-    PassportModule.register({ defaultStrategy: 'jwt', session: true }),
+    PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
@@ -23,7 +21,7 @@ import { SessionSerializer } from './session.serializer';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, GoogleStrategy, PrismaService, SessionSerializer],
+  providers: [AuthService, JwtStrategy, PrismaService],
   exports: [AuthService, JwtStrategy, PassportModule],
 })
 export class AuthModule {}
