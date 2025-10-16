@@ -15,7 +15,7 @@ import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { GetUser } from './decorators/get-user.decorator';
 import { AuthGuard } from '@nestjs/passport';
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
