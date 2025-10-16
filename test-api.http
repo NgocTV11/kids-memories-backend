@@ -1,0 +1,598 @@
+### Kids Memories API Testing
+### Base URL: http://localhost:3001/api/v1
+
+### ========================================
+### 1. AUTHENTICATION
+### ========================================
+
+### 1.1 Register New User
+POST http://localhost:3001/api/v1/auth/register
+Content-Type: application/json
+
+{
+  "email": "mom@example.com",
+  "password": "password123",
+  "display_name": "Mom"
+}
+
+###
+
+### 1.2 Register Another User (Dad)
+POST http://localhost:3001/api/v1/auth/register
+Content-Type: application/json
+
+{
+  "email": "dad@example.com",
+  "password": "password123",
+  "display_name": "Dad"
+}
+
+###
+
+### 1.3 Login
+POST http://localhost:3001/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "mom@example.com",
+  "password": "password123"
+}
+
+###
+
+### 1.4 Get Profile (Protected - Replace TOKEN)
+GET http://localhost:3001/api/v1/auth/profile
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+### 1.5 Refresh Token (Protected - Replace TOKEN)
+POST http://localhost:3001/api/v1/auth/refresh
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+### ========================================
+### 2. TEST SCENARIOS
+### ========================================
+
+### 2.1 Register with Invalid Email
+POST http://localhost:3001/api/v1/auth/register
+Content-Type: application/json
+
+{
+  "email": "invalid-email",
+  "password": "password123",
+  "display_name": "Test"
+}
+
+###
+
+### 2.2 Register with Weak Password (< 6 chars)
+POST http://localhost:3001/api/v1/auth/register
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "123",
+  "display_name": "Test"
+}
+
+###
+
+### 2.3 Register with Duplicate Email
+POST http://localhost:3001/api/v1/auth/register
+Content-Type: application/json
+
+{
+  "email": "mom@example.com",
+  "password": "password123",
+  "display_name": "Another Mom"
+}
+
+###
+
+### 2.4 Login with Wrong Password
+POST http://localhost:3001/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "mom@example.com",
+  "password": "wrongpassword"
+}
+
+###
+
+### 2.5 Login with Non-existent User
+POST http://localhost:3001/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "notexist@example.com",
+  "password": "password123"
+}
+
+###
+
+### 2.6 Access Protected Route without Token
+GET http://localhost:3001/api/v1/auth/profile
+
+###
+
+### ========================================
+### 3. USERS MANAGEMENT
+### ========================================
+
+### 3.1 Get Current User Profile (Protected)
+GET http://localhost:3001/api/v1/users/me
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+### 3.2 Update Profile (Protected)
+PUT http://localhost:3001/api/v1/users/me
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "display_name": "Updated Mom",
+  "language": "en"
+}
+
+###
+
+### 3.3 Change Password (Protected)
+PUT http://localhost:3001/api/v1/users/me/password
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "current_password": "password123",
+  "new_password": "newpassword123"
+}
+
+###
+
+### 3.4 Get All Users (Admin Only - Protected)
+GET http://localhost:3001/api/v1/users
+Authorization: Bearer YOUR_ADMIN_ACCESS_TOKEN_HERE
+
+###
+
+### 3.5 Get User by ID (Admin Only - Protected)
+GET http://localhost:3001/api/v1/users/USER_ID_HERE
+Authorization: Bearer YOUR_ADMIN_ACCESS_TOKEN_HERE
+
+###
+
+### 3.6 Delete User (Admin Only - Protected)
+DELETE http://localhost:3001/api/v1/users/USER_ID_HERE
+Authorization: Bearer YOUR_ADMIN_ACCESS_TOKEN_HERE
+
+###
+
+### ========================================
+### 4. KIDS PROFILE MANAGEMENT
+### ========================================
+
+### 4.1 Create Kid Profile
+POST http://localhost:3001/api/v1/kids
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "name": "Emma Johnson",
+  "date_of_birth": "2020-03-15",
+  "gender": "female",
+  "bio": "Our little sunshine ☀️"
+}
+
+###
+
+### 4.2 Create Another Kid
+POST http://localhost:3001/api/v1/kids
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "name": "Liam Johnson",
+  "date_of_birth": "2018-07-22",
+  "gender": "male",
+  "bio": "Loves dinosaurs 🦖"
+}
+
+###
+
+### 4.3 Get All Kids (for current user)
+GET http://localhost:3001/api/v1/kids
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+### 4.4 Get One Kid by ID (Replace KID_ID_HERE)
+GET http://localhost:3001/api/v1/kids/KID_ID_HERE
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+### 4.5 Update Kid Profile (Replace KID_ID_HERE)
+PUT http://localhost:3001/api/v1/kids/KID_ID_HERE
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "name": "Emma Rose Johnson",
+  "bio": "Our little sunshine ☀️ Loves dancing!"
+}
+
+###
+
+### 4.6 Add Growth Data (Replace KID_ID_HERE)
+POST http://localhost:3001/api/v1/kids/KID_ID_HERE/growth
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "date": "2025-10-16",
+  "height": 105.5,
+  "weight": 18.2,
+  "note": "Monthly checkup - growing well!"
+}
+
+###
+
+### 4.7 Get Growth History (Replace KID_ID_HERE)
+GET http://localhost:3001/api/v1/kids/KID_ID_HERE/growth
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+### 4.8 Delete Kid Profile (Replace KID_ID_HERE)
+DELETE http://localhost:3001/api/v1/kids/KID_ID_HERE
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+### ========================================
+### 5. ALBUMS MANAGEMENT
+### ========================================
+
+### 5.1 Create Album
+POST http://localhost:3001/api/v1/albums
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "title": "Summer Vacation 2025",
+  "description": "Amazing summer memories at the beach!",
+  "kid_id": "KID_ID_HERE",
+  "privacy_level": "family",
+  "tags": ["beach", "vacation", "summer"]
+}
+
+###
+
+### 5.2 Create Another Album (No kid - Family album)
+POST http://localhost:3001/api/v1/albums
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "title": "Family Gathering 2025",
+  "description": "New Year celebration with everyone",
+  "privacy_level": "private",
+  "tags": ["family", "celebration", "new year"]
+}
+
+###
+
+### 5.3 Get All Albums
+GET http://localhost:3001/api/v1/albums
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+### 5.4 Get Albums for Specific Kid
+GET http://localhost:3001/api/v1/albums?kid_id=KID_ID_HERE
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+### 5.5 Get One Album by ID
+GET http://localhost:3001/api/v1/albums/ALBUM_ID_HERE
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+### 5.6 Update Album
+PUT http://localhost:3001/api/v1/albums/ALBUM_ID_HERE
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "title": "Summer Vacation 2025 - Updated",
+  "privacy_level": "public",
+  "tags": ["beach", "vacation", "summer", "fun"]
+}
+
+###
+
+### 5.7 Share Album (Generate share link)
+POST http://localhost:3001/api/v1/albums/ALBUM_ID_HERE/share
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "password": "share123",
+  "expires_at": "2025-12-31T23:59:59Z"
+}
+
+###
+
+### 5.8 Get Shared Album (Public - No Auth, with password)
+GET http://localhost:3001/api/v1/albums/shared/SHARE_TOKEN_HERE?password=share123
+
+###
+
+### 5.9 Remove Share (Stop sharing)
+DELETE http://localhost:3001/api/v1/albums/ALBUM_ID_HERE/share
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+### 5.10 Delete Album
+DELETE http://localhost:3001/api/v1/albums/ALBUM_ID_HERE
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+### ========================================
+### ========================================
+### 6. PHOTOS MANAGEMENT
+### ========================================
+
+### 6.1 Upload Photo (with image file)
+# Note: Use multipart/form-data with a file field named "photo"
+# This test requires REST Client extension with file support
+POST http://localhost:3001/api/v1/photos/upload?album_id=ALBUM_ID_HERE
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="photo"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< ./test-image.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="caption"
+
+Ảnh gia đình vui vẻ
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="date_taken"
+
+2024-01-15T10:30:00Z
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="tags"
+
+["family", "holiday", "2024"]
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+###
+
+### 6.2 Get All Photos
+GET http://localhost:3001/api/v1/photos
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+### 6.3 Get Photos by Album
+GET http://localhost:3001/api/v1/photos?album_id=ALBUM_ID_HERE
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+### 6.4 Get Photos by Kid
+GET http://localhost:3001/api/v1/photos?kid_id=KID_ID_HERE
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+### 6.5 Get Photos with Pagination
+GET http://localhost:3001/api/v1/photos?limit=10&offset=0
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+### 6.6 Get Single Photo
+GET http://localhost:3001/api/v1/photos/PHOTO_ID_HERE
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+### 6.7 Update Photo Metadata
+PUT http://localhost:3001/api/v1/photos/PHOTO_ID_HERE
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "caption": "Updated caption",
+  "date_taken": "2024-01-20T14:00:00Z",
+  "tags": ["updated", "family"]
+}
+
+###
+
+### 6.8 Tag Kids in Photo
+POST http://localhost:3001/api/v1/photos/PHOTO_ID_HERE/tag-kids
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "kids_tagged": ["KID_ID_1", "KID_ID_2"]
+}
+
+###
+
+### 6.9 Like a Photo
+POST http://localhost:3001/api/v1/photos/PHOTO_ID_HERE/like
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+### 6.10 Unlike a Photo
+DELETE http://localhost:3001/api/v1/photos/PHOTO_ID_HERE/like
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+### 6.11 Delete Photo (Soft Delete)
+DELETE http://localhost:3001/api/v1/photos/PHOTO_ID_HERE
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+### ========================================
+### 7. COMMENTS MANAGEMENT
+### ========================================
+
+### 7.1 Create a Comment
+POST http://localhost:3001/api/v1/comments
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "photo_id": "PHOTO_ID_HERE",
+  "content": "Ảnh đẹp quá!"
+}
+
+###
+
+### 7.2 Create a Reply to Comment
+POST http://localhost:3001/api/v1/comments
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "photo_id": "PHOTO_ID_HERE",
+  "content": "Cảm ơn bạn!",
+  "parent_comment_id": "COMMENT_ID_HERE"
+}
+
+###
+
+### 7.3 Get All Comments for Photo (Hierarchical)
+GET http://localhost:3001/api/v1/comments?photo_id=PHOTO_ID_HERE
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+### 7.4 Get Single Comment with Replies
+GET http://localhost:3001/api/v1/comments/COMMENT_ID_HERE
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+### 7.5 Update Comment
+PUT http://localhost:3001/api/v1/comments/COMMENT_ID_HERE
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "content": "Updated comment content"
+}
+
+###
+
+### 7.6 Delete Comment
+DELETE http://localhost:3001/api/v1/comments/COMMENT_ID_HERE
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+### ========================================
+### 8. MILESTONES MANAGEMENT
+### ========================================
+
+### 8.1 Create Milestone
+POST http://localhost:3001/api/v1/milestones
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "kid_id": "KID_ID_HERE",
+  "title": "First Steps",
+  "description": "Bé đã biết đi những bước đầu tiên!",
+  "milestone_date": "2024-01-15",
+  "category": "physical",
+  "photo_ids": ["PHOTO_ID_1", "PHOTO_ID_2"]
+}
+
+###
+
+### 8.2 Get All Milestones
+GET http://localhost:3001/api/v1/milestones
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+### 8.3 Get Milestones by Kid
+GET http://localhost:3001/api/v1/milestones?kid_id=KID_ID_HERE
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+### 8.4 Get Single Milestone with Photos
+GET http://localhost:3001/api/v1/milestones/MILESTONE_ID_HERE
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+### 8.5 Update Milestone
+PUT http://localhost:3001/api/v1/milestones/MILESTONE_ID_HERE
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "title": "Updated Milestone Title",
+  "description": "Updated description",
+  "category": "cognitive"
+}
+
+###
+
+### 8.6 Attach Photos to Milestone
+POST http://localhost:3001/api/v1/milestones/MILESTONE_ID_HERE/photos
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "photo_ids": ["PHOTO_ID_3", "PHOTO_ID_4"]
+}
+
+###
+
+### 8.7 Detach Photos from Milestone
+DELETE http://localhost:3001/api/v1/milestones/MILESTONE_ID_HERE/photos
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "photo_ids": ["PHOTO_ID_1"]
+}
+
+###
+
+### 8.8 Delete Milestone
+DELETE http://localhost:3001/api/v1/milestones/MILESTONE_ID_HERE
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+### ========================================
+### 9. HEALTH CHECK
+### ========================================
+
+### 9.1 Check if Backend is Running
+GET http://localhost:3001/api/v1
+
+###

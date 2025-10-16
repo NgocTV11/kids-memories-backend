@@ -1,0 +1,249 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model users {
+  id            String    @id @default(uuid()) @db.Uuid
+  email         String    @unique @db.VarChar(255)
+  password_hash String?   @db.VarChar(255)
+  display_name  String    @db.VarChar(100)
+  avatar_url    String?   @db.VarChar(500)
+  role          String    @default("family_member") @db.VarChar(20)
+  language      String    @default("vi") @db.VarChar(5)
+  
+  google_id     String?   @unique @db.VarChar(255)
+  google_email  String?   @db.VarChar(255)
+  google_avatar String?   @db.VarChar(500)
+  
+  created_at    DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+  last_login    DateTime? @db.Timestamptz(6)
+  
+  is_deleted    Boolean   @default(false)
+  deleted_at    DateTime? @db.Timestamptz(6)
+  
+  kids          kids[]
+  albums        albums[]
+  photos        photos[]
+  comments      comments[]
+  likes         likes[]
+  milestones    milestones[]
+  shares        shares[]
+  notifications notifications[]
+  storage_usage storage_usage?
+  
+  owned_families families[] @relation("FamilyOwner")
+  family_memberships family_members[]
+}
+
+model families {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @db.VarChar(100)
+  description String?  @db.Text
+  owner_id    String   @db.Uuid
+  avatar_url  String?  @db.VarChar(500)
+  
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+  
+  is_deleted  Boolean   @default(false)
+  deleted_at  DateTime? @db.Timestamptz(6)
+  
+  owner       users    @relation("FamilyOwner", fields: [owner_id], references: [id], onDelete: Cascade)
+  members     family_members[]
+  kids        kids[]
+  albums      albums[]
+}
+
+model family_members {
+  id         String   @id @default(uuid()) @db.Uuid
+  family_id  String   @db.Uuid
+  user_id    String   @db.Uuid
+  role       String   @default("member") @db.VarChar(20) // owner, admin, member
+  status     String   @default("pending") @db.VarChar(20) // pending, active, rejected
+  
+  joined_at  DateTime @default(now()) @db.Timestamptz(6)
+  
+  family     families @relation(fields: [family_id], references: [id], onDelete: Cascade)
+  user       users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  
+  @@unique([family_id, user_id])
+}
+
+model kids {
+  id               String    @id @default(uuid()) @db.Uuid
+  created_by       String    @db.Uuid
+  family_id        String?   @db.Uuid
+  name             String    @db.VarChar(100)
+  date_of_birth    DateTime  @db.Date
+  gender           String    @db.VarChar(10)
+  profile_picture  String?   @db.VarChar(500)
+  bio              String?   @db.Text
+  growth_data      Json      @default("[]") @db.JsonB
+  
+  created_at       DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+  
+  user             users     @relation(fields: [created_by], references: [id], onDelete: Cascade)
+  family           families? @relation(fields: [family_id], references: [id], onDelete: SetNull)
+  albums           albums[]
+  milestones       milestones[]
+}
+
+model albums {
+  id               String    @id @default(uuid()) @db.Uuid
+  created_by       String    @db.Uuid
+  family_id        String?   @db.Uuid
+  kid_id           String?   @db.Uuid
+  title            String    @db.VarChar(200)
+  description      String?   @db.Text
+  cover_photo_url  String?   @db.VarChar(500)
+  privacy_level    String    @default("private") @db.VarChar(20)
+  tags             Json      @default("[]") @db.JsonB
+  
+  created_at       DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+  
+  is_deleted       Boolean   @default(false)
+  deleted_at       DateTime? @db.Timestamptz(6)
+  
+  user             users     @relation(fields: [created_by], references: [id], onDelete: Cascade)
+  family           families? @relation(fields: [family_id], references: [id], onDelete: SetNull)
+  kid              kids?     @relation(fields: [kid_id], references: [id], onDelete: SetNull)
+  photos           photos[]
+  shares           shares[]
+}
+
+model photos {
+  id               String    @id @default(uuid()) @db.Uuid
+  album_id         String    @db.Uuid
+  uploaded_by      String    @db.Uuid
+  file_url         String    @db.VarChar(500)
+  thumbnail_url    String?   @db.VarChar(500)
+  medium_url       String?   @db.VarChar(500)
+  caption          String?   @db.Text
+  date_taken       DateTime? @db.Timestamptz(6)
+  exif_data        Json      @default("{}") @db.JsonB
+  kids_tagged      Json      @default("[]") @db.JsonB
+  tags             Json      @default("[]") @db.JsonB
+  view_count       Int       @default(0)
+  likes_count      Int       @default(0)
+  comments_count   Int       @default(0)
+  
+  created_at       DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+  
+  is_deleted       Boolean   @default(false)
+  deleted_at       DateTime? @db.Timestamptz(6)
+  
+  album            albums    @relation(fields: [album_id], references: [id], onDelete: Cascade)
+  user             users     @relation(fields: [uploaded_by], references: [id], onDelete: Cascade)
+  comments         comments[]
+  likes            likes[]
+  milestone_photos milestone_photos[]
+}
+
+model milestones {
+  id               String    @id @default(uuid()) @db.Uuid
+  kid_id           String    @db.Uuid
+  created_by       String    @db.Uuid
+  title            String    @db.VarChar(200)
+  description      String?   @db.Text
+  milestone_date   DateTime  @db.Date
+  category         String    @db.VarChar(50)
+  
+  created_at       DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+  
+  kid              kids      @relation(fields: [kid_id], references: [id], onDelete: Cascade)
+  user             users     @relation(fields: [created_by], references: [id], onDelete: Cascade)
+  milestone_photos milestone_photos[]
+}
+
+model milestone_photos {
+  id            String     @id @default(uuid()) @db.Uuid
+  milestone_id  String     @db.Uuid
+  photo_id      String     @db.Uuid
+  
+  created_at    DateTime   @default(now()) @db.Timestamptz(6)
+  
+  milestone     milestones @relation(fields: [milestone_id], references: [id], onDelete: Cascade)
+  photo         photos     @relation(fields: [photo_id], references: [id], onDelete: Cascade)
+  
+  @@unique([milestone_id, photo_id])
+}
+
+model comments {
+  id                 String    @id @default(uuid()) @db.Uuid
+  photo_id           String    @db.Uuid
+  user_id            String    @db.Uuid
+  parent_comment_id  String?   @db.Uuid
+  content            String    @db.Text
+  
+  created_at         DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+  
+  is_deleted         Boolean   @default(false)
+  
+  photo              photos    @relation(fields: [photo_id], references: [id], onDelete: Cascade)
+  user               users     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  parent_comment     comments? @relation("CommentReplies", fields: [parent_comment_id], references: [id], onDelete: Cascade)
+  replies            comments[] @relation("CommentReplies")
+}
+
+model likes {
+  id         String   @id @default(uuid()) @db.Uuid
+  photo_id   String   @db.Uuid
+  user_id    String   @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  
+  photo      photos   @relation(fields: [photo_id], references: [id], onDelete: Cascade)
+  user       users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  
+  @@unique([photo_id, user_id])
+}
+
+model shares {
+  id            String    @id @default(uuid()) @db.Uuid
+  album_id      String    @db.Uuid
+  shared_by     String    @db.Uuid
+  share_token   String    @unique @db.VarChar(255)
+  password_hash String?   @db.VarChar(255)
+  permissions   Json      @default("{}") @db.JsonB
+  expires_at    DateTime? @db.Timestamptz(6)
+  view_count    Int       @default(0)
+  
+  created_at    DateTime  @default(now()) @db.Timestamptz(6)
+  
+  album         albums    @relation(fields: [album_id], references: [id], onDelete: Cascade)
+  user          users     @relation(fields: [shared_by], references: [id], onDelete: Cascade)
+}
+
+model notifications {
+  id         String   @id @default(uuid()) @db.Uuid
+  user_id    String   @db.Uuid
+  type       String   @db.VarChar(50)
+  data       Json     @default("{}") @db.JsonB
+  is_read    Boolean  @default(false)
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  
+  user       users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model storage_usage {
+  id            String   @id @default(uuid()) @db.Uuid
+  user_id       String   @unique @db.Uuid
+  photos_size   BigInt   @default(0)
+  videos_size   BigInt   @default(0)
+  total_size    BigInt   @default(0)
+  photo_count   Int      @default(0)
+  video_count   Int      @default(0)
+  updated_at    DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+  
+  user          users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
