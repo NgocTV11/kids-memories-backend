@@ -29,6 +29,21 @@ async function bootstrap() {
 
   // Security (allow images to be displayed)
   app.use(
+    session({
+      secret: process.env.SESSION_SECRET || 'your-secret-key',
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        maxAge: 86400000, // 24 hours
+        secure: process.env.NODE_ENV === 'production',
+      },
+    })
+  );
+
+  // Initialize Passport and restore authentication state from session
+  app.use(passport.initialize());
+  app.use(passport.session());
+  app.use(
     helmet({
       crossOriginResourcePolicy: { policy: 'cross-origin' },
     }),
