@@ -4,6 +4,8 @@ import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import helmet from 'helmet';
+import session from 'express-session';
+import * as passport from 'passport';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -31,6 +33,23 @@ async function bootstrap() {
       crossOriginResourcePolicy: { policy: 'cross-origin' },
     }),
   );
+
+  // Session support for OAuth
+  app.use(
+    session({
+      secret: process.env.JWT_SECRET || 'dev-secret',
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        maxAge: 60000,
+        secure: process.env.NODE_ENV === 'production',
+      },
+    }),
+  );
+
+  // Initialize Passport and restore authentication state from session
+  app.use(passport.initialize());
+  app.use(passport.session());
 
   // Validation
   app.useGlobalPipes(

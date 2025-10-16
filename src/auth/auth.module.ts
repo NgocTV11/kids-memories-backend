@@ -7,6 +7,16 @@ import { AuthService } from './auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { PrismaService } from '../prisma/prisma.service';
+import * as passport from 'passport';
+
+// Required for maintaining login sessions
+passport.serializeUser((user: any, done: any) => {
+  done(null, user);
+});
+
+passport.deserializeUser((obj: any, done: any) => {
+  done(null, obj);
+});
 
 @Module({
   imports: [
