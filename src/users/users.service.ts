@@ -5,13 +5,17 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { StorageService, StorageFolder } from '../storage/storage.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private storageService: StorageService,
+  ) {}
 
   /**
    * Get current user profile
@@ -115,6 +119,44 @@ export class UsersService {
     });
 
     return { message: 'Đổi mật khẩu thành công' };
+  }
+
+  /**
+   * Upload avatar
+   */
+  async uploadAvatar(userId: string, file: Express.Multer.File) {
+    const user = await this.prisma.users.findUnique({
+      where: { id: userId, is_deleted: false },
+    });
+
+    if (!user) {
+      throw new NotFoundException('Người dùng không tồn tại');
+    }
+
+    // Upload to S3 or local storage
+    const avatarUrl = await this.storageService.uploadFile(
+      file,
+      StorageFolder.AVATARS,
+    );
+
+    // Delete old avatar if exists
+    if (user.avatar_url) {
+      await this.storageService.deleteFile(user.avatar_url);
+    }
+
+    // Update user avatar
+    await this.prisma.users.update({
+      where: { id: userId },
+      data: {
+        avatar_url: avatarUrl,
+        updated_at: new Date(),
+      },
+    });
+
+    return {
+      url: avatarUrl,
+      message: 'Upload avatar thành công',
+    };
   }
 
   /**
