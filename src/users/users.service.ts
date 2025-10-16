@@ -86,7 +86,7 @@ export class UsersService {
 
     if (!user.password_hash) {
       throw new BadRequestException(
-        'Tài khoản này đăng nhập qua Google, không có mật khẩu',
+        'Tài khoản này chưa có mật khẩu, vui lòng liên hệ quản trị viên',
       );
     }
 
