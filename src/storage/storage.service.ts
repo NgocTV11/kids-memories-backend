@@ -58,7 +58,7 @@ export class StorageService {
   }
 
   /**
-   * Upload to AWS S3
+   * Upload to AWS S3 (Updated: Oct 17, 2025 - Force rebuild without ACL)
    */
   private async uploadToS3(
     file: Express.Multer.File,
@@ -69,12 +69,12 @@ export class StorageService {
     const key = `${folder}/${fileName}`;
 
     try {
+      // Modern S3 buckets (post-2023) use Bucket Policy instead of per-object ACLs
       const command = new PutObjectCommand({
         Bucket: this.bucketName,
         Key: key,
         Body: file.buffer,
         ContentType: file.mimetype,
-        // ❌ Removed ACL - Bucket uses Bucket Policy for public access instead
       });
 
       await this.s3Client.send(command);
