@@ -127,17 +127,15 @@ Kids Memories Team
     .button {
       display: inline-block;
       padding: 14px 30px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background-color: #667eea;
       color: white !important;
       text-decoration: none;
       border-radius: 6px;
       font-weight: bold;
       margin: 20px 0;
-      transition: transform 0.2s;
     }
     .button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      background-color: #764ba2;
     }
     .warning {
       background: #fff3cd;
@@ -182,8 +180,24 @@ Kids Memories Team
       
       <p>Nhấp vào nút bên dưới để tạo mật khẩu mới:</p>
       
-      <div style="text-align: center;">
-        <a href="${resetUrl}" class="button">Đặt lại mật khẩu</a>
+      <div style="text-align: center; margin: 30px 0;">
+        <!--[if mso]>
+        <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${resetUrl}" style="height:50px;v-text-anchor:middle;width:200px;" arcsize="10%" strokecolor="#667eea" fillcolor="#667eea">
+          <w:anchorlock/>
+          <center style="color:#ffffff;font-family:sans-serif;font-size:16px;font-weight:bold;">Đặt lại mật khẩu</center>
+        </v:roundrect>
+        <![endif]-->
+        <!--[if !mso]><!-->
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" style="margin: auto;">
+          <tr>
+            <td style="border-radius: 6px; background-color: #667eea;">
+              <a href="${resetUrl}" target="_blank" style="background-color: #667eea; border: 15px solid #667eea; color: #ffffff; display: inline-block; font-family: sans-serif; font-size: 16px; font-weight: bold; line-height: 20px; text-align: center; text-decoration: none; border-radius: 6px; -webkit-text-size-adjust: none; mso-padding-alt: 0px;">
+                Đặt lại mật khẩu
+              </a>
+            </td>
+          </tr>
+        </table>
+        <!--<![endif]-->
       </div>
       
       <div class="warning">
