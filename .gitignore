@@ -11,3 +11,5 @@ uploads/**/*
 !uploads/photos/original/
 !uploads/photos/thumbnail/
 !uploads/photos/medium/
+
+dist/
