@@ -57,6 +57,15 @@ export class PhotosService {
       }
     }
 
+    // 🔍 DEBUG LOG
+    console.log('🔍 Photo Upload Debug:', {
+      userId,
+      albumId,
+      userRole,
+      isAdmin: userRole === 'admin',
+      willApplyFilter: userRole !== 'admin',
+    });
+
     // Verify album access (ownership or family membership)
     // Admin có quyền truy cập tất cả albums
     const album = await this.prisma.albums.findFirst({

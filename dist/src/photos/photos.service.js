@@ -53,10 +53,22 @@ let PhotosService = class PhotosService {
         const album = await this.prisma.albums.findFirst({
             where: {
                 id: albumId,
-                user: {
-                    id: userId,
-                },
                 is_deleted: false,
+                OR: [
+                    {
+                        created_by: userId,
+                    },
+                    {
+                        family: {
+                            members: {
+                                some: {
+                                    user_id: userId,
+                                    status: 'active',
+                                },
+                            },
+                        },
+                    },
+                ],
             },
         });
         if (!album) {

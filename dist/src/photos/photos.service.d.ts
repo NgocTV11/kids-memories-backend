@@ -10,23 +10,16 @@ export declare class PhotosService {
         likes_count: number;
         comments_count: number;
         _count: undefined;
+        album: {
+            id: string;
+            title: string;
+        };
         user: {
             id: string;
             display_name: string;
             avatar_url: string | null;
         };
-        album: {
-            id: string;
-            title: string;
-        };
         id: string;
-        created_at: Date;
-        updated_at: Date;
-        is_deleted: boolean;
-        deleted_at: Date | null;
-        tags: import("@prisma/client/runtime/library").JsonValue;
-        album_id: string;
-        uploaded_by: string;
         file_url: string;
         thumbnail_url: string | null;
         medium_url: string | null;
@@ -34,7 +27,14 @@ export declare class PhotosService {
         date_taken: Date | null;
         exif_data: import("@prisma/client/runtime/library").JsonValue;
         kids_tagged: import("@prisma/client/runtime/library").JsonValue;
+        tags: import("@prisma/client/runtime/library").JsonValue;
         view_count: number;
+        created_at: Date;
+        updated_at: Date;
+        is_deleted: boolean;
+        deleted_at: Date | null;
+        album_id: string;
+        uploaded_by: string;
     }>;
     findAll(userId: string, albumId?: string, kidId?: string, limit?: number, offset?: number, userRole?: string): Promise<{
         data: any[];
@@ -46,23 +46,16 @@ export declare class PhotosService {
         likes_count: number;
         comments_count: number;
         _count: undefined;
+        album: {
+            id: string;
+            title: string;
+        };
         user: {
             id: string;
             display_name: string;
             avatar_url: string | null;
         };
-        album: {
-            id: string;
-            title: string;
-        };
         id: string;
-        created_at: Date;
-        updated_at: Date;
-        is_deleted: boolean;
-        deleted_at: Date | null;
-        tags: import("@prisma/client/runtime/library").JsonValue;
-        album_id: string;
-        uploaded_by: string;
         file_url: string;
         thumbnail_url: string | null;
         medium_url: string | null;
@@ -70,29 +63,29 @@ export declare class PhotosService {
         date_taken: Date | null;
         exif_data: import("@prisma/client/runtime/library").JsonValue;
         kids_tagged: import("@prisma/client/runtime/library").JsonValue;
+        tags: import("@prisma/client/runtime/library").JsonValue;
         view_count: number;
+        created_at: Date;
+        updated_at: Date;
+        is_deleted: boolean;
+        deleted_at: Date | null;
+        album_id: string;
+        uploaded_by: string;
     }>;
     update(userId: string, photoId: string, updateDto: UpdatePhotoDto): Promise<{
         likes_count: number;
         comments_count: number;
         _count: undefined;
+        album: {
+            id: string;
+            title: string;
+        };
         user: {
             id: string;
             display_name: string;
             avatar_url: string | null;
         };
-        album: {
-            id: string;
-            title: string;
-        };
         id: string;
-        created_at: Date;
-        updated_at: Date;
-        is_deleted: boolean;
-        deleted_at: Date | null;
-        tags: import("@prisma/client/runtime/library").JsonValue;
-        album_id: string;
-        uploaded_by: string;
         file_url: string;
         thumbnail_url: string | null;
         medium_url: string | null;
@@ -100,7 +93,14 @@ export declare class PhotosService {
         date_taken: Date | null;
         exif_data: import("@prisma/client/runtime/library").JsonValue;
         kids_tagged: import("@prisma/client/runtime/library").JsonValue;
+        tags: import("@prisma/client/runtime/library").JsonValue;
         view_count: number;
+        created_at: Date;
+        updated_at: Date;
+        is_deleted: boolean;
+        deleted_at: Date | null;
+        album_id: string;
+        uploaded_by: string;
     }>;
     remove(userId: string, photoId: string): Promise<{
         message: string;
@@ -114,13 +114,6 @@ export declare class PhotosService {
             title: string;
         };
         id: string;
-        created_at: Date;
-        updated_at: Date;
-        is_deleted: boolean;
-        deleted_at: Date | null;
-        tags: import("@prisma/client/runtime/library").JsonValue;
-        album_id: string;
-        uploaded_by: string;
         file_url: string;
         thumbnail_url: string | null;
         medium_url: string | null;
@@ -128,7 +121,14 @@ export declare class PhotosService {
         date_taken: Date | null;
         exif_data: import("@prisma/client/runtime/library").JsonValue;
         kids_tagged: import("@prisma/client/runtime/library").JsonValue;
+        tags: import("@prisma/client/runtime/library").JsonValue;
         view_count: number;
+        created_at: Date;
+        updated_at: Date;
+        is_deleted: boolean;
+        deleted_at: Date | null;
+        album_id: string;
+        uploaded_by: string;
     }>;
     like(userId: string, photoId: string): Promise<{
         message: string;
@@ -152,8 +152,8 @@ export declare class PhotosService {
         created_at: Date;
         updated_at: Date;
         is_deleted: boolean;
-        user_id: string;
         photo_id: string;
+        user_id: string;
         parent_comment_id: string | null;
         content: string;
     })[]>;
@@ -168,8 +168,8 @@ export declare class PhotosService {
         created_at: Date;
         updated_at: Date;
         is_deleted: boolean;
-        user_id: string;
         photo_id: string;
+        user_id: string;
         parent_comment_id: string | null;
         content: string;
     }>;
