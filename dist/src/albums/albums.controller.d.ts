@@ -8,6 +8,7 @@ export declare class AlbumsController {
     create(userId: string, userRole: string, createAlbumDto: CreateAlbumDto): Promise<{
         id: string;
         created_at: Date;
+        tags: import("@prisma/client/runtime/library").JsonValue;
         family_id: string | null;
         family: {
             id: string;
@@ -18,7 +19,6 @@ export declare class AlbumsController {
         kid_id: string | null;
         privacy_level: string;
         cover_photo_url: string | null;
-        tags: import("@prisma/client/runtime/library").JsonValue;
         kid: {
             id: string;
             name: string;
@@ -30,12 +30,12 @@ export declare class AlbumsController {
         photos_count: number;
         id: string;
         created_at: Date;
+        tags: import("@prisma/client/runtime/library").JsonValue;
         family_id: string | null;
         description: string | null;
         title: string;
         kid_id: string | null;
         privacy_level: string;
-        tags: import("@prisma/client/runtime/library").JsonValue;
         kid: {
             id: string;
             name: string;
@@ -47,6 +47,7 @@ export declare class AlbumsController {
         id: string;
         created_at: Date;
         updated_at: Date;
+        tags: import("@prisma/client/runtime/library").JsonValue;
         family_id: string | null;
         family: {
             id: string;
@@ -57,7 +58,6 @@ export declare class AlbumsController {
         kid_id: string | null;
         privacy_level: string;
         cover_photo_url: string | null;
-        tags: import("@prisma/client/runtime/library").JsonValue;
         kid: {
             id: string;
             name: string;
@@ -67,13 +67,13 @@ export declare class AlbumsController {
     update(userId: string, userRole: string, albumId: string, updateAlbumDto: UpdateAlbumDto): Promise<{
         id: string;
         updated_at: Date;
+        tags: import("@prisma/client/runtime/library").JsonValue;
         family_id: string | null;
         description: string | null;
         title: string;
         kid_id: string | null;
         privacy_level: string;
         cover_photo_url: string | null;
-        tags: import("@prisma/client/runtime/library").JsonValue;
     }>;
     remove(userId: string, userRole: string, albumId: string): Promise<{
         message: string;
@@ -96,10 +96,10 @@ export declare class AlbumsController {
             caption: string | null;
             date_taken: Date | null;
         }[];
+        tags: import("@prisma/client/runtime/library").JsonValue;
         description: string | null;
         title: string;
         cover_photo_url: string | null;
-        tags: import("@prisma/client/runtime/library").JsonValue;
         kid: {
             id: string;
             name: string;

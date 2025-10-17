@@ -6,21 +6,18 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UsersModule = void 0;
+exports.StorageModule = void 0;
 const common_1 = require("@nestjs/common");
-const users_controller_1 = require("./users.controller");
-const users_service_1 = require("./users.service");
-const prisma_module_1 = require("../prisma/prisma.module");
-const storage_module_1 = require("../storage/storage.module");
-let UsersModule = class UsersModule {
+const config_1 = require("@nestjs/config");
+const storage_service_1 = require("./storage.service");
+let StorageModule = class StorageModule {
 };
-exports.UsersModule = UsersModule;
-exports.UsersModule = UsersModule = __decorate([
+exports.StorageModule = StorageModule;
+exports.StorageModule = StorageModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule, storage_module_1.StorageModule],
-        controllers: [users_controller_1.UsersController],
-        providers: [users_service_1.UsersService],
-        exports: [users_service_1.UsersService],
+        imports: [config_1.ConfigModule],
+        providers: [storage_service_1.StorageService],
+        exports: [storage_service_1.StorageService],
     })
-], UsersModule);
-//# sourceMappingURL=users.module.js.map
+], StorageModule);
+//# sourceMappingURL=storage.module.js.map

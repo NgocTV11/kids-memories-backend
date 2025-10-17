@@ -26,6 +26,10 @@ export declare class UsersController {
     changePassword(userId: string, changePasswordDto: ChangePasswordDto): Promise<{
         message: string;
     }>;
+    uploadAvatar(userId: string, file: Express.Multer.File): Promise<{
+        url: string;
+        message: string;
+    }>;
     getAllUsers(currentUserId: string): Promise<{
         id: string;
         email: string;

@@ -45,11 +45,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsersService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
+const storage_service_1 = require("../storage/storage.service");
 const bcrypt = __importStar(require("bcrypt"));
 let UsersService = class UsersService {
     prisma;
-    constructor(prisma) {
+    storageService;
+    constructor(prisma, storageService) {
         this.prisma = prisma;
+        this.storageService = storageService;
     }
     async getProfile(userId) {
         const user = await this.prisma.users.findUnique({
@@ -120,6 +123,29 @@ let UsersService = class UsersService {
             },
         });
         return { message: 'Đổi mật khẩu thành công' };
+    }
+    async uploadAvatar(userId, file) {
+        const user = await this.prisma.users.findUnique({
+            where: { id: userId, is_deleted: false },
+        });
+        if (!user) {
+            throw new common_1.NotFoundException('Người dùng không tồn tại');
+        }
+        const avatarUrl = await this.storageService.uploadFile(file, storage_service_1.StorageFolder.AVATARS);
+        if (user.avatar_url) {
+            await this.storageService.deleteFile(user.avatar_url);
+        }
+        await this.prisma.users.update({
+            where: { id: userId },
+            data: {
+                avatar_url: avatarUrl,
+                updated_at: new Date(),
+            },
+        });
+        return {
+            url: avatarUrl,
+            message: 'Upload avatar thành công',
+        };
     }
     async getAllUsers(currentUserId) {
         const currentUser = await this.prisma.users.findUnique({
@@ -202,6 +228,7 @@ let UsersService = class UsersService {
 exports.UsersService = UsersService;
 exports.UsersService = UsersService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        storage_service_1.StorageService])
 ], UsersService);
 //# sourceMappingURL=users.service.js.map

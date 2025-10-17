@@ -14,6 +14,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsersController = void 0;
 const common_1 = require("@nestjs/common");
+const platform_express_1 = require("@nestjs/platform-express");
 const users_service_1 = require("./users.service");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const get_user_decorator_1 = require("../auth/decorators/get-user.decorator");
@@ -32,6 +33,12 @@ let UsersController = class UsersController {
     }
     async changePassword(userId, changePasswordDto) {
         return this.usersService.changePassword(userId, changePasswordDto);
+    }
+    async uploadAvatar(userId, file) {
+        if (!file) {
+            throw new common_1.BadRequestException('Vui lòng chọn file ảnh');
+        }
+        return this.usersService.uploadAvatar(userId, file);
     }
     async getAllUsers(currentUserId) {
         return this.usersService.getAllUsers(currentUserId);
@@ -67,6 +74,25 @@ __decorate([
     __metadata("design:paramtypes", [String, change_password_dto_1.ChangePasswordDto]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "changePassword", null);
+__decorate([
+    (0, common_1.Post)('me/avatar'),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {
+        fileFilter: (req, file, callback) => {
+            if (!file.mimetype.match(/\/(jpg|jpeg|png|gif)$/)) {
+                return callback(new common_1.BadRequestException('Chỉ chấp nhận file ảnh (jpg, jpeg, png, gif)'), false);
+            }
+            callback(null, true);
+        },
+        limits: {
+            fileSize: 5 * 1024 * 1024,
+        },
+    })),
+    __param(0, (0, get_user_decorator_1.GetUser)('id')),
+    __param(1, (0, common_1.UploadedFile)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "uploadAvatar", null);
 __decorate([
     (0, common_1.Get)(),
     __param(0, (0, get_user_decorator_1.GetUser)('id')),
