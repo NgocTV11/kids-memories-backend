@@ -27,6 +27,7 @@ export class PhotosService {
     userId: string,
     albumId: string,
     uploadDto: UploadPhotoDto,
+    userRole: string = 'user',
   ) {
     // Parse kids_tagged and tags if they come as JSON strings from FormData
     let kidsTagged: string[] = [];
@@ -57,27 +58,30 @@ export class PhotosService {
     }
 
     // Verify album access (ownership or family membership)
+    // Admin có quyền truy cập tất cả albums
     const album = await this.prisma.albums.findFirst({
       where: {
         id: albumId,
         is_deleted: false,
-        OR: [
-          // Option 1: User owns the album
-          {
-            created_by: userId,
-          },
-          // Option 2: Album belongs to a family that user is member of
-          {
-            family: {
-              members: {
-                some: {
-                  user_id: userId,
-                  status: 'active',
+        ...(userRole !== 'admin' && {
+          OR: [
+            // Option 1: User owns the album
+            {
+              created_by: userId,
+            },
+            // Option 2: Album belongs to a family that user is member of
+            {
+              family: {
+                members: {
+                  some: {
+                    user_id: userId,
+                    status: 'active',
+                  },
                 },
               },
             },
-          },
-        ],
+          ],
+        }),
       },
     });
 

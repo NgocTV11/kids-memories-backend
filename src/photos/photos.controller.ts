@@ -52,6 +52,7 @@ export class PhotosController {
   async upload(
     @UploadedFile() file: Express.Multer.File,
     @GetUser('id') userId: string,
+    @GetUser('role') userRole: string,
     @Query('album_id', ParseUUIDPipe) albumId: string,
     @Body() uploadDto: UploadPhotoDto,
   ) {
@@ -59,7 +60,7 @@ export class PhotosController {
       throw new BadRequestException('Photo file is required');
     }
 
-    return this.photosService.upload(file, userId, albumId, uploadDto);
+    return this.photosService.upload(file, userId, albumId, uploadDto, userRole);
   }
 
   /**
