@@ -74,7 +74,7 @@ export class StorageService {
         Key: key,
         Body: file.buffer,
         ContentType: file.mimetype,
-        ACL: 'public-read', // Make file publicly accessible
+        // ❌ Removed ACL - Bucket uses Bucket Policy for public access instead
       });
 
       await this.s3Client.send(command);
