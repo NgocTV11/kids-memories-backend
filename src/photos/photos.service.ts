@@ -56,14 +56,28 @@ export class PhotosService {
       }
     }
 
-    // Verify album access (ownership or family membership) - userRole will be added later
+    // Verify album access (ownership or family membership)
     const album = await this.prisma.albums.findFirst({
       where: {
         id: albumId,
-        user: {
-          id: userId,
-        },
         is_deleted: false,
+        OR: [
+          // Option 1: User owns the album
+          {
+            created_by: userId,
+          },
+          // Option 2: Album belongs to a family that user is member of
+          {
+            family: {
+              members: {
+                some: {
+                  user_id: userId,
+                  status: 'active',
+                },
+              },
+            },
+          },
+        ],
       },
     });
 
