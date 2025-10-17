@@ -24,13 +24,29 @@ async function bootstrap() {
     lastModified: true,
   });
 
-  // CORS
-  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+  // CORS - Support multiple frontend domains
+  const allowedOrigins = [
+    'http://localhost:3000',
+    'https://kids-memories-frontend.vercel.app',
+    'https://mihhan.vercel.app',
+    process.env.FRONTEND_URL,
+  ].filter(Boolean); // Remove undefined values
+
   app.enableCors({
-    origin: frontendUrl,
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps or curl)
+      if (!origin) return callback(null, true);
+      
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.warn(`⚠️  CORS blocked origin: ${origin}`);
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
   });
-  console.log(`✅ CORS enabled for: ${frontendUrl}`);
+  console.log(`✅ CORS enabled for: ${allowedOrigins.join(', ')}`);
 
   // Security (allow images to be displayed)
   app.use(
