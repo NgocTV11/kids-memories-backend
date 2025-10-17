@@ -2,10 +2,10 @@
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
     "builder": "NIXPACKS",
-    "buildCommand": "echo 'Force rebuild 20251017-1310' && rm -rf dist && npm install && npx prisma generate && npm run build"
+    "buildCommand": "echo 'Force rebuild with migration 20251017-1420' && rm -rf dist && npm install && npx prisma generate && npm run build"
   },
   "deploy": {
-    "startCommand": "npm run start:prod",
+    "startCommand": "npx prisma migrate deploy && npm run start:prod",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10
   }
