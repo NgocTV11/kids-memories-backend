@@ -169,10 +169,22 @@ export class AlbumsService {
       // Filter out deleted photos
       const activePhotos = album.photos.filter(p => !p.is_deleted);
       
+      // Determine cover photo URL
+      let coverPhotoUrl = album.cover_photo_url;
+      
+      // If cover_photo_url is a local path (starts with /uploads/), use first photo's thumbnail instead
+      if (coverPhotoUrl && coverPhotoUrl.startsWith('/uploads/')) {
+        coverPhotoUrl = activePhotos[0]?.thumbnail_url || null;
+      }
+      
+      // If no cover_photo_url at all, use first photo's thumbnail
+      if (!coverPhotoUrl) {
+        coverPhotoUrl = activePhotos[0]?.thumbnail_url || null;
+      }
+      
       return {
         ...album,
-        // Use cover_photo_url if set, otherwise use first active photo's thumbnail
-        cover_photo_url: album.cover_photo_url || (activePhotos[0]?.thumbnail_url || null),
+        cover_photo_url: coverPhotoUrl,
         photos: undefined, // Remove photos array from response
         photos_count: activePhotos.length,
       };
@@ -230,8 +242,28 @@ export class AlbumsService {
       throw new NotFoundException('Album không tồn tại hoặc không có quyền truy cập');
     }
 
+    // Fix cover_photo_url if it's a local path
+    let coverPhotoUrl = album.cover_photo_url;
+    if (coverPhotoUrl && coverPhotoUrl.startsWith('/uploads/')) {
+      // Get first photo's thumbnail as fallback
+      const firstPhoto = await this.prisma.photos.findFirst({
+        where: {
+          album_id: albumId,
+          is_deleted: false,
+        },
+        select: {
+          thumbnail_url: true,
+        },
+        orderBy: {
+          created_at: 'asc',
+        },
+      });
+      coverPhotoUrl = firstPhoto?.thumbnail_url || null;
+    }
+
     return {
       ...album,
+      cover_photo_url: coverPhotoUrl,
       photo_count: album._count.photos,
       _count: undefined,
     };
@@ -479,7 +511,23 @@ export class AlbumsService {
       },
     });
 
-    return album;
+    if (!album) {
+      throw new NotFoundException('Album không tồn tại');
+    }
+
+    // Fix cover_photo_url if it's a local path
+    let coverPhotoUrl = album.cover_photo_url;
+    if (coverPhotoUrl && coverPhotoUrl.startsWith('/uploads/')) {
+      coverPhotoUrl = album.photos[0]?.thumbnail_url || null;
+    }
+    if (!coverPhotoUrl) {
+      coverPhotoUrl = album.photos[0]?.thumbnail_url || null;
+    }
+
+    return {
+      ...album,
+      cover_photo_url: coverPhotoUrl,
+    };
   }
 
   /**
