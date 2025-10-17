@@ -5,17 +5,22 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { StorageService, StorageFolder } from '../storage/storage.service';
 import { ImageProcessor } from './helpers/image-processor';
 import { UploadPhotoDto } from './dto/upload-photo.dto';
 import { UpdatePhotoDto } from './dto/update-photo.dto';
 import { TagKidsDto } from './dto/tag-kids.dto';
 import { buildFamilyAccessWhere } from '../common/helpers/family-access.helper';
+import sharp from 'sharp';
 
 @Injectable()
 export class PhotosService {
   private imageProcessor: ImageProcessor;
 
-  constructor(private prisma: PrismaService) {
+  constructor(
+    private prisma: PrismaService,
+    private storageService: StorageService,
+  ) {
     this.imageProcessor = new ImageProcessor();
   }
 
@@ -98,12 +103,6 @@ export class PhotosService {
       throw new NotFoundException('Album not found or you do not have access');
     }
 
-    // Process image (create thumbnail, medium versions)
-    const imageResult = await this.imageProcessor.processImage(
-      file.buffer,
-      file.originalname,
-    );
-
     // Extract EXIF data
     const exifData = await this.imageProcessor.extractExifData(file.buffer);
 
@@ -121,6 +120,37 @@ export class PhotosService {
       }
     }
 
+    // Upload original to S3
+    const originalUrl = await this.storageService.uploadFile(file, StorageFolder.PHOTOS);
+
+    // Process and upload thumbnail (200x200)
+    const thumbnailBuffer = await sharp(file.buffer)
+      .rotate() // Auto-rotate based on EXIF
+      .resize(200, 200, { fit: 'cover' })
+      .jpeg({ quality: 80 })
+      .toBuffer();
+    
+    const thumbnailFile = {
+      ...file,
+      buffer: thumbnailBuffer,
+      originalname: `thumb_${file.originalname}`,
+    };
+    const thumbnailUrl = await this.storageService.uploadFile(thumbnailFile, StorageFolder.PHOTOS);
+
+    // Process and upload medium (800x800)
+    const mediumBuffer = await sharp(file.buffer)
+      .rotate() // Auto-rotate based on EXIF
+      .resize(800, 800, { fit: 'inside' })
+      .jpeg({ quality: 90 })
+      .toBuffer();
+    
+    const mediumFile = {
+      ...file,
+      buffer: mediumBuffer,
+      originalname: `medium_${file.originalname}`,
+    };
+    const mediumUrl = await this.storageService.uploadFile(mediumFile, StorageFolder.PHOTOS);
+
     // Create photo record
     const photo = await this.prisma.photos.create({
       data: {
@@ -134,9 +164,9 @@ export class PhotosService {
             id: userId,
           },
         },
-        file_url: imageResult.originalUrl,
-        thumbnail_url: imageResult.thumbnailUrl,
-        medium_url: imageResult.mediumUrl,
+        file_url: originalUrl,
+        thumbnail_url: thumbnailUrl,
+        medium_url: mediumUrl,
         caption: uploadDto.caption || null,
         date_taken: dateTaken,
         exif_data: exifData,
@@ -170,7 +200,7 @@ export class PhotosService {
     if (!album.cover_photo_url) {
       await this.prisma.albums.update({
         where: { id: albumId },
-        data: { cover_photo_url: imageResult.thumbnailUrl },
+        data: { cover_photo_url: thumbnailUrl },
       });
     }
 

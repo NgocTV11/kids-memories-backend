@@ -3,11 +3,13 @@ import { MulterModule } from '@nestjs/platform-express';
 import { PhotosController } from './photos.controller';
 import { PhotosService } from './photos.service';
 import { PrismaModule } from '../prisma/prisma.module';
+import { StorageModule } from '../storage/storage.module';
 import { memoryStorage } from 'multer';
 
 @Module({
   imports: [
     PrismaModule,
+    StorageModule,
     MulterModule.register({
       storage: memoryStorage(), // Store files in memory as Buffer
       limits: {
