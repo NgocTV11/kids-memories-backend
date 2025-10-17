@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
+import { EmailService } from '../email/email.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
@@ -19,6 +20,7 @@ export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
+    private emailService: EmailService,
   ) {}
 
   async register(registerDto: RegisterDto) {
@@ -195,18 +197,29 @@ export class AuthService {
       },
     });
 
-    // TODO: Send email with reset link
-    // For now, just log the token (in production, send via email)
+    // Send password reset email
     const frontendUrl =
       process.env.FRONTEND_URL || 'http://localhost:3000';
     const resetUrl = `${frontendUrl}/auth/reset-password?token=${resetToken}`;
 
-    console.log('🔐 Password Reset Link:', resetUrl);
-    console.log('   Email:', email);
-    console.log('   Expires:', expiresAt.toISOString());
+    try {
+      const emailSent = await this.emailService.sendPasswordResetEmail(
+        email,
+        resetUrl,
+        user.display_name,
+      );
 
-    // In production, you would send an email here using a service like SendGrid, AWS SES, etc.
-    // await this.emailService.sendPasswordResetEmail(email, resetUrl);
+      if (emailSent) {
+        console.log('✅ Password reset email sent to:', email);
+      } else {
+        // If email fails, still log for development
+        console.log('⚠️  Email sending disabled. Reset URL:', resetUrl);
+        console.log('   Expires:', expiresAt.toISOString());
+      }
+    } catch (error) {
+      console.error('❌ Failed to send password reset email:', error);
+      // Don't throw error - we don't want to reveal if email exists
+    }
 
     return {
       message:
