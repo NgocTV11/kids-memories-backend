@@ -265,4 +265,47 @@ export class UsersService {
 
     return { message: 'Xóa người dùng thành công' };
   }
+
+  /**
+   * Search users by name or email
+   */
+  async searchUsers(currentUserId: string, query: string) {
+    if (!query || query.trim().length < 2) {
+      throw new BadRequestException('Từ khóa tìm kiếm phải có ít nhất 2 ký tự');
+    }
+
+    const searchTerm = query.trim().toLowerCase();
+
+    const users = await this.prisma.users.findMany({
+      where: {
+        is_deleted: false,
+        id: {
+          not: currentUserId, // Exclude current user
+        },
+        OR: [
+          {
+            display_name: {
+              contains: searchTerm,
+              mode: 'insensitive',
+            },
+          },
+          {
+            email: {
+              contains: searchTerm,
+              mode: 'insensitive',
+            },
+          },
+        ],
+      },
+      select: {
+        id: true,
+        email: true,
+        display_name: true,
+        avatar_url: true,
+      },
+      take: 20, // Limit results
+    });
+
+    return users;
+  }
 }

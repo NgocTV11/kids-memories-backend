@@ -5,6 +5,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { StorageService, StorageFolder } from '../storage/storage.service';
 import { CreateKidDto } from './dto/create-kid.dto';
 import { UpdateKidDto } from './dto/update-kid.dto';
 import { AddGrowthDataDto } from './dto/add-growth-data.dto';
@@ -15,7 +16,10 @@ import {
 
 @Injectable()
 export class KidsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private storageService: StorageService,
+  ) {}
 
   /**
    * Create a new kid profile
@@ -386,5 +390,65 @@ export class KidsService {
     } else {
       return `${months} tháng`;
     }
+  }
+
+  /**
+   * Upload avatar for a kid
+   */
+  async uploadAvatar(
+    userId: string,
+    kidId: string,
+    file: Express.Multer.File,
+    userRole?: string,
+  ) {
+    // Check kid exists and user has access
+    const familyWhere = await buildFamilyAccessWhere(
+      this.prisma,
+      userId,
+      userRole,
+    );
+
+    const kid = await this.prisma.kids.findFirst({
+      where: {
+        id: kidId,
+        ...familyWhere,
+      },
+    });
+
+    if (!kid) {
+      throw new NotFoundException(
+        'Hồ sơ trẻ không tồn tại hoặc không có quyền truy cập',
+      );
+    }
+
+    // Delete old avatar if exists and is S3 URL
+    if (kid.profile_picture && kid.profile_picture.includes('s3.')) {
+      const oldKey = kid.profile_picture.split('/').pop();
+      if (oldKey) {
+        await this.storageService.deleteFile(`avatars/${oldKey}`);
+      }
+    }
+
+    // Upload new avatar to S3
+    const avatarUrl = await this.storageService.uploadFile(
+      file,
+      StorageFolder.AVATARS,
+    );
+
+    // Update kid record
+    const updatedKid = await this.prisma.kids.update({
+      where: { id: kidId },
+      data: { profile_picture: avatarUrl },
+      select: {
+        id: true,
+        name: true,
+        profile_picture: true,
+      },
+    });
+
+    return {
+      message: 'Đã cập nhật ảnh đại diện',
+      kid: updatedKid,
+    };
   }
 }

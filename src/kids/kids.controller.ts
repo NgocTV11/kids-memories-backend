@@ -7,7 +7,13 @@ import {
   Body,
   Param,
   UseGuards,
+  UseInterceptors,
+  UploadedFile,
+  ParseFilePipe,
+  MaxFileSizeValidator,
+  FileTypeValidator,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { KidsService } from './kids.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { GetUser } from '../auth/decorators/get-user.decorator';
@@ -102,5 +108,28 @@ export class KidsController {
     @Param('id') kidId: string,
   ) {
     return this.kidsService.getGrowthHistory(userId, kidId, userRole);
+  }
+
+  /**
+   * Upload avatar for a kid
+   * POST /api/v1/kids/:id/avatar
+   */
+  @Post(':id/avatar')
+  @UseInterceptors(FileInterceptor('avatar'))
+  async uploadAvatar(
+    @GetUser('id') userId: string,
+    @GetUser('role') userRole: string,
+    @Param('id') kidId: string,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }), // 5MB
+          new FileTypeValidator({ fileType: /image\/(jpeg|jpg|png|webp)/ }),
+        ],
+      }),
+    )
+    avatar: Express.Multer.File,
+  ) {
+    return this.kidsService.uploadAvatar(userId, kidId, avatar, userRole);
   }
 }

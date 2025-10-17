@@ -61,16 +61,17 @@ model families {
 }
 
 model family_members {
-  id         String   @id @default(uuid()) @db.Uuid
-  family_id  String   @db.Uuid
-  user_id    String   @db.Uuid
-  role       String   @default("member") @db.VarChar(20) // owner, admin, member
-  status     String   @default("pending") @db.VarChar(20) // pending, active, rejected
+  id           String   @id @default(uuid()) @db.Uuid
+  family_id    String   @db.Uuid
+  user_id      String   @db.Uuid
+  role         String   @default("member") @db.VarChar(20) // owner, admin, member
+  relationship String?  @db.VarChar(50) // ông, bà, bố, mẹ, con, etc.
+  status       String   @default("pending") @db.VarChar(20) // pending, active, rejected
   
-  joined_at  DateTime @default(now()) @db.Timestamptz(6)
+  joined_at    DateTime @default(now()) @db.Timestamptz(6)
   
-  family     families @relation(fields: [family_id], references: [id], onDelete: Cascade)
-  user       users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  family       families @relation(fields: [family_id], references: [id], onDelete: Cascade)
+  user         users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
   
   @@unique([family_id, user_id])
 }

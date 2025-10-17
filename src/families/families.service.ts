@@ -134,7 +134,11 @@ export class FamiliesService {
           where: {
             status: 'active',
           },
-          include: {
+          select: {
+            id: true,
+            role: true,
+            relationship: true,
+            joined_at: true,
             user: {
               select: {
                 id: true,
@@ -299,6 +303,7 @@ export class FamiliesService {
         where: { id: existingMember.id },
         data: {
           role: inviteMemberDto.role,
+          relationship: inviteMemberDto.relationship,
           status: 'pending',
         },
         include: {
@@ -321,6 +326,7 @@ export class FamiliesService {
         family_id: familyId,
         user_id: inviteMemberDto.user_id,
         role: inviteMemberDto.role,
+        relationship: inviteMemberDto.relationship,
         status: 'pending',
       },
       include: {

@@ -1,4 +1,4 @@
-import { IsString, IsEnum } from 'class-validator';
+import { IsString, IsEnum, IsOptional } from 'class-validator';
 
 export class InviteMemberDto {
   @IsString()
@@ -6,4 +6,8 @@ export class InviteMemberDto {
 
   @IsEnum(['owner', 'admin', 'member'])
   role: 'owner' | 'admin' | 'member';
+
+  @IsOptional()
+  @IsString()
+  relationship?: string; // ông, bà, bố, mẹ, con, etc.
 }

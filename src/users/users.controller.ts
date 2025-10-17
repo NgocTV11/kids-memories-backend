@@ -10,6 +10,7 @@ import {
   UseInterceptors,
   UploadedFile,
   BadRequestException,
+  Query,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UsersService } from './users.service';
@@ -86,6 +87,18 @@ export class UsersController {
     }
 
     return this.usersService.uploadAvatar(userId, file);
+  }
+
+  /**
+   * Search users by name or email
+   * GET /api/v1/users/search?q=keyword
+   */
+  @Get('search')
+  async searchUsers(
+    @GetUser('id') currentUserId: string,
+    @Query('q') query: string,
+  ) {
+    return this.usersService.searchUsers(currentUserId, query);
   }
 
   /**
