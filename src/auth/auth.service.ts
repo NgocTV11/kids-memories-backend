@@ -3,12 +3,16 @@ import {
   ConflictException,
   UnauthorizedException,
   BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class AuthService {
@@ -155,7 +159,107 @@ export class AuthService {
     return user;
   }
 
+  async forgotPassword(forgotPasswordDto: ForgotPasswordDto) {
+    const { email } = forgotPasswordDto;
 
+    // Find user by email
+    const user = await this.prisma.users.findUnique({
+      where: { email },
+      select: { id: true, email: true, display_name: true, is_deleted: true },
+    });
+
+    // Always return success message (security: don't reveal if email exists)
+    if (!user || user.is_deleted) {
+      return {
+        message:
+          'Nếu email tồn tại, bạn sẽ nhận được link đặt lại mật khẩu trong vài phút',
+      };
+    }
+
+    // Generate reset token (random 32-byte hex string)
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(resetToken)
+      .digest('hex');
+
+    // Token expires in 1 hour
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
+
+    // Save hashed token to database
+    await this.prisma.users.update({
+      where: { id: user.id },
+      data: {
+        reset_password_token: hashedToken,
+        reset_password_expires: expiresAt,
+      },
+    });
+
+    // TODO: Send email with reset link
+    // For now, just log the token (in production, send via email)
+    const frontendUrl =
+      process.env.FRONTEND_URL || 'http://localhost:3000';
+    const resetUrl = `${frontendUrl}/auth/reset-password?token=${resetToken}`;
+
+    console.log('🔐 Password Reset Link:', resetUrl);
+    console.log('   Email:', email);
+    console.log('   Expires:', expiresAt.toISOString());
+
+    // In production, you would send an email here using a service like SendGrid, AWS SES, etc.
+    // await this.emailService.sendPasswordResetEmail(email, resetUrl);
+
+    return {
+      message:
+        'Nếu email tồn tại, bạn sẽ nhận được link đặt lại mật khẩu trong vài phút',
+      // For development only - remove in production
+      ...(process.env.NODE_ENV === 'development' && { resetUrl }),
+    };
+  }
+
+  async resetPassword(resetPasswordDto: ResetPasswordDto) {
+    const { token, password } = resetPasswordDto;
+
+    // Hash the token to compare with database
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+    // Find user with valid token
+    const user = await this.prisma.users.findFirst({
+      where: {
+        reset_password_token: hashedToken,
+        reset_password_expires: {
+          gt: new Date(), // Token not expired
+        },
+        is_deleted: false,
+      },
+      select: { id: true, email: true },
+    });
+
+    if (!user) {
+      throw new BadRequestException(
+        'Token đặt lại mật khẩu không hợp lệ hoặc đã hết hạn',
+      );
+    }
+
+    // Hash new password
+    const saltRounds = 12;
+    const password_hash = await bcrypt.hash(password, saltRounds);
+
+    // Update password and clear reset token
+    await this.prisma.users.update({
+      where: { id: user.id },
+      data: {
+        password_hash,
+        reset_password_token: null,
+        reset_password_expires: null,
+      },
+    });
+
+    console.log('✅ Password reset successful for:', user.email);
+
+    return {
+      message: 'Mật khẩu đã được đặt lại thành công. Bạn có thể đăng nhập ngay.',
+    };
+  }
 
   private async generateTokens(
     userId: string,
