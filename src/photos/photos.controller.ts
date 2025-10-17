@@ -123,9 +123,10 @@ export class PhotosController {
   @Delete(':id')
   async remove(
     @GetUser('id') userId: string,
+    @GetUser('role') userRole: string,
     @Param('id', ParseUUIDPipe) photoId: string,
   ) {
-    return this.photosService.remove(userId, photoId);
+    return this.photosService.remove(userId, photoId, userRole);
   }
 
   /**

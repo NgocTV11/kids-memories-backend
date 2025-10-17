@@ -69,8 +69,12 @@ export class KidsController {
    * DELETE /api/v1/kids/:id
    */
   @Delete(':id')
-  async remove(@GetUser('id') userId: string, @Param('id') kidId: string) {
-    return this.kidsService.remove(userId, kidId);
+  async remove(
+    @GetUser('id') userId: string,
+    @GetUser('role') userRole: string,
+    @Param('id') kidId: string,
+  ) {
+    return this.kidsService.remove(userId, kidId, userRole);
   }
 
   /**
@@ -80,10 +84,11 @@ export class KidsController {
   @Post(':id/growth')
   async addGrowthData(
     @GetUser('id') userId: string,
+    @GetUser('role') userRole: string,
     @Param('id') kidId: string,
     @Body() growthDataDto: AddGrowthDataDto,
   ) {
-    return this.kidsService.addGrowthData(userId, kidId, growthDataDto);
+    return this.kidsService.addGrowthData(userId, kidId, growthDataDto, userRole);
   }
 
   /**
@@ -93,8 +98,9 @@ export class KidsController {
   @Get(':id/growth')
   async getGrowthHistory(
     @GetUser('id') userId: string,
+    @GetUser('role') userRole: string,
     @Param('id') kidId: string,
   ) {
-    return this.kidsService.getGrowthHistory(userId, kidId);
+    return this.kidsService.getGrowthHistory(userId, kidId, userRole);
   }
 }

@@ -237,14 +237,16 @@ export class KidsService {
   /**
    * Hard delete kid profile (CASCADE will delete related albums/photos)
    */
-  async remove(userId: string, kidId: string) {
-    // Check ownership
+  async remove(userId: string, kidId: string, userRole?: string) {
+    // Check ownership (admin can delete any kid)
     const kid = await this.prisma.kids.findFirst({
       where: {
         id: kidId,
-        user: {
-          id: userId,
-        },
+        ...(userRole !== 'admin' && {
+          user: {
+            id: userId,
+          },
+        }),
       },
     });
 
@@ -267,14 +269,19 @@ export class KidsService {
     userId: string,
     kidId: string,
     growthDataDto: AddGrowthDataDto,
+    userRole?: string,
   ) {
-    // Check ownership
+    // Check access (ownership, family membership, or admin)
+    const familyWhere = await buildFamilyAccessWhere(
+      this.prisma,
+      userId,
+      userRole,
+    );
+
     const kid = await this.prisma.kids.findFirst({
       where: {
         id: kidId,
-        user: {
-          id: userId,
-        },
+        ...familyWhere,
       },
     });
 
@@ -323,14 +330,18 @@ export class KidsService {
   /**
    * Get growth history for a kid
    */
-  async getGrowthHistory(userId: string, kidId: string) {
-    // Check ownership
+  async getGrowthHistory(userId: string, kidId: string, userRole?: string) {
+    // Check access (ownership, family membership, or admin)
+    const familyWhere = await buildFamilyAccessWhere(
+      this.prisma,
+      userId,
+      userRole,
+    );
+
     const kid = await this.prisma.kids.findFirst({
       where: {
         id: kidId,
-        user: {
-          id: userId,
-        },
+        ...familyWhere,
       },
       select: {
         id: true,

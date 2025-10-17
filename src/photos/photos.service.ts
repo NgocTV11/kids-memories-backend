@@ -422,17 +422,19 @@ export class PhotosService {
   /**
    * Soft delete a photo
    */
-  async remove(userId: string, photoId: string) {
-    // Check ownership
+  async remove(userId: string, photoId: string, userRole?: string) {
+    // Check ownership (admin can delete any photo)
     const photo = await this.prisma.photos.findFirst({
       where: {
         id: photoId,
         is_deleted: false,
         album: {
-          user: {
-            id: userId,
-          },
           is_deleted: false,
+          ...(userRole !== 'admin' && {
+            user: {
+              id: userId,
+            },
+          }),
         },
       },
     });
