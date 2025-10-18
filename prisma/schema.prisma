@@ -33,6 +33,7 @@ model users {
   kids          kids[]
   albums        albums[]
   photos        photos[]
+  videos        videos[]
   comments      comments[]
   likes         likes[]
   milestones    milestones[]
@@ -97,6 +98,7 @@ model kids {
   family           families? @relation(fields: [family_id], references: [id], onDelete: SetNull)
   albums           albums[]
   milestones       milestones[]
+  videos           videos[]
 }
 
 model albums {
@@ -120,6 +122,7 @@ model albums {
   family           families? @relation(fields: [family_id], references: [id], onDelete: SetNull)
   kid              kids?     @relation(fields: [kid_id], references: [id], onDelete: SetNull)
   photos           photos[]
+  videos           videos[]
   shares           shares[]
 }
 
@@ -250,4 +253,59 @@ model storage_usage {
   updated_at    DateTime @default(now()) @updatedAt @db.Timestamptz(6)
   
   user          users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model videos {
+  id                 String    @id @default(uuid()) @db.Uuid
+  album_id           String?   @db.Uuid
+  kid_id             String?   @db.Uuid
+  uploaded_by        String    @db.Uuid
+  
+  title              String?   @db.VarChar(200)
+  description        String?   @db.Text
+  
+  // S3 Storage
+  s3_key             String    @db.VarChar(500)
+  file_url           String    @db.VarChar(500)
+  thumbnail_s3_key   String    @db.VarChar(500)
+  thumbnail_url      String    @db.VarChar(500)
+  
+  // Video Metadata
+  duration           Float?    // seconds (e.g., 125.5)
+  file_size          BigInt    // bytes
+  mime_type          String    @db.VarChar(50)
+  codec              String?   @db.VarChar(50)
+  width              Int?      // pixels
+  height             Int?      // pixels
+  bitrate            Int?      // kbps
+  
+  // Additional Info
+  date_taken         DateTime? @db.Timestamptz(6)
+  location           String?   @db.VarChar(200)
+  tags               Json      @default("[]") @db.JsonB
+  kids_tagged        Json      @default("[]") @db.JsonB
+  
+  // Statistics
+  view_count         Int       @default(0)
+  likes_count        Int       @default(0)
+  comments_count     Int       @default(0)
+  
+  // Timestamps
+  created_at         DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+  
+  // Soft Delete
+  is_deleted         Boolean   @default(false)
+  deleted_at         DateTime? @db.Timestamptz(6)
+  
+  // Relations
+  album              albums?   @relation(fields: [album_id], references: [id], onDelete: SetNull)
+  kid                kids?     @relation(fields: [kid_id], references: [id], onDelete: SetNull)
+  user               users     @relation(fields: [uploaded_by], references: [id], onDelete: Cascade)
+  
+  @@index([album_id])
+  @@index([kid_id])
+  @@index([uploaded_by])
+  @@index([created_at])
+  @@index([is_deleted])
 }

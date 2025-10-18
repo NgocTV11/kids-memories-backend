@@ -9,6 +9,7 @@ import { UsersModule } from './users/users.module';
 import { KidsModule } from './kids/kids.module';
 import { AlbumsModule } from './albums/albums.module';
 import { PhotosModule } from './photos/photos.module';
+import { VideoModule } from './video/video.module';
 import { CommentsModule } from './comments/comments.module';
 import { MilestonesModule } from './milestones/milestones.module';
 import { StatsModule } from './stats/stats.module';
@@ -27,6 +28,7 @@ import { AdminModule } from './admin/admin.module';
     KidsModule,
     AlbumsModule,
     PhotosModule,
+    VideoModule,
     CommentsModule,
     MilestonesModule,
     StatsModule,
