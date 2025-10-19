@@ -138,6 +138,7 @@ model photos {
   exif_data        Json      @default("{}") @db.JsonB
   kids_tagged      Json      @default("[]") @db.JsonB
   tags             Json      @default("[]") @db.JsonB
+  metadata         Json      @default("{}") @db.JsonB // AI-generated metadata (labels, faces)
   view_count       Int       @default(0)
   likes_count      Int       @default(0)
   comments_count   Int       @default(0)
