@@ -24,9 +24,10 @@ async function bootstrap() {
     lastModified: true,
   });
 
-  // CORS - Support multiple frontend domains
+  // CORS - Support multiple frontend domains + mobile app
   const allowedOrigins = [
     'http://localhost:3000',
+    'http://localhost:8081', // Expo dev
     'https://kids-memories-frontend.vercel.app',
     'https://mihhan.vercel.app',
     process.env.FRONTEND_URL,
@@ -34,19 +35,32 @@ async function bootstrap() {
 
   app.enableCors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps or curl)
+      // Allow requests with no origin (like mobile apps, Expo Go, or curl)
       if (!origin) return callback(null, true);
+      
+      // Allow expo:// and exp:// schemes for mobile
+      if (origin.startsWith('exp://') || origin.startsWith('expo://')) {
+        return callback(null, true);
+      }
       
       if (allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
-        console.warn(`⚠️  CORS blocked origin: ${origin}`);
-        callback(new Error('Not allowed by CORS'));
+        // In development, be more permissive
+        if (process.env.NODE_ENV === 'development') {
+          console.warn(`⚠️  CORS allowing origin in dev mode: ${origin}`);
+          callback(null, true);
+        } else {
+          console.warn(`⚠️  CORS blocked origin: ${origin}`);
+          callback(new Error('Not allowed by CORS'));
+        }
       }
     },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   });
-  console.log(`✅ CORS enabled for: ${allowedOrigins.join(', ')}`);
+  console.log(`✅ CORS enabled for: ${allowedOrigins.join(', ')} + mobile apps`);
 
   // Security (allow images to be displayed)
   app.use(
