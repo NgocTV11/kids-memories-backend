@@ -30,6 +30,7 @@ async function bootstrap() {
     'http://localhost:8081', // Expo dev
     'https://kids-memories-frontend.vercel.app',
     'https://mihhan.vercel.app',
+    'https://minhhan.vercel.app',
     process.env.FRONTEND_URL,
   ].filter(Boolean); // Remove undefined values
 
